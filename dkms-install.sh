@@ -1,12 +1,12 @@
-#!/bin/bash
+#!/bin/bash -e
 
-VERSION=0.10
-MODULE_DIR="/usr/src/isgx-$VERSION"
+VERSION="0.10"
 
-mkdir -p "$MODULE_DIR/src"
-cp -r * "$MODULE_DIR/src"
-mv "$MODULE_DIR/src/dkms.conf" "$MODULE_DIR/"
-cat Makefile | sed "s/KERNELRELEASE/PATCHLEVEL/g" > "$MODULE_DIR/src/Makefile"
-dkms add -m isgx -v "$VERSION"
-dkms build -m isgx -v "$VERSION" --verbose
-dkms install -m isgx -v "$VERSION"
+SOURCE=`pwd`
+
+if ! dkms status -m isgx -v "$VERSION" | grep -q 'added\|built\|installed' ; then
+    dkms add --sourcetree=$SOURCE -m isgx -v "$VERSION"
+fi
+
+dkms build --sourcetree=$SOURCE -m isgx -v "$VERSION" --verbose
+dkms install --sourcetree=$SOURCE -m isgx -v "$VERSION"
